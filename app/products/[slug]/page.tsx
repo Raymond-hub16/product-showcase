@@ -1,3 +1,4 @@
+// app/products/[slug]/page.tsx
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -17,22 +18,23 @@ interface Product {
   };
 }
 
-// Define the expected props structure for an App Router page
+// Next.js App Router dynamic page props interface
+// `params` is for route segments (e.g., [slug])
+// `searchParams` is for URL query parameters (e.g., ?foo=bar)
 interface ProductDetailPageProps {
-  params: { slug: string };
-  // Add searchParams, even if you don't use it, to satisfy the expected PageProps type
-  // You can use Record<string, string | string[]> if you want more specific typing
+  // Use Record<string, string> for params specific to [slug] if you know it's always a string
+  // If it were a catch-all route like [...slug], it would be string[]
+  params: { slug: string }; // This is actually the most precise for `[slug]`
   searchParams?: { [key: string]: string | string[] | undefined };
 }
 
-
 export default function ProductDetailPage({
   params,
-  // Make sure to destructure searchParams even if you don't use it
-  // If you omit it here, TypeScript might complain that it's missing from the type
   searchParams,
-}: ProductDetailPageProps) { // Use the defined interface here
-  const { slug } = params;
+}: ProductDetailPageProps) {
+  // CORRECTED LINE: Directly access params.slug
+  const slug = params.slug; // This will correctly be typed as 'string'
+  
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const [isFavorite, setIsFavorite] = useState(false);
