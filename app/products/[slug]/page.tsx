@@ -1,9 +1,8 @@
-'use client'; // This is required for useState and useEffect
-
+'use client';
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import Image from 'next/image'; // Import Next.js Image component
+import Image from 'next/image';
 
 interface Product {
   id: number;
@@ -18,12 +17,22 @@ interface Product {
   };
 }
 
+// Define the expected props structure for an App Router page
+interface ProductDetailPageProps {
+  params: { slug: string };
+  // Add searchParams, even if you don't use it, to satisfy the expected PageProps type
+  // You can use Record<string, string | string[]> if you want more specific typing
+  searchParams?: { [key: string]: string | string[] | undefined };
+}
+
+
 export default function ProductDetailPage({
   params,
-}: {
-  params: { slug: string };
-}) {
-  const { slug } = params; // Get the product ID from the URL (slug is the dynamic part)
+  // Make sure to destructure searchParams even if you don't use it
+  // If you omit it here, TypeScript might complain that it's missing from the type
+  searchParams,
+}: ProductDetailPageProps) { // Use the defined interface here
+  const { slug } = params;
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const [isFavorite, setIsFavorite] = useState(false);
@@ -38,7 +47,6 @@ export default function ProductDetailPage({
         const data: Product = await res.json();
         setProduct(data);
 
-        // Check if product is in favorites from localStorage
         const favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
         setIsFavorite(favorites.includes(data.id));
       } catch (error) {
@@ -48,24 +56,22 @@ export default function ProductDetailPage({
       }
     };
 
-    if (slug) { // Only fetch if slug is available
+    if (slug) {
       fetchProduct();
     }
-  }, [slug]); // Re-run effect if slug changes
+  }, [slug]);
 
   const handleToggleFavorite = () => {
     if (product) {
       const favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
       let updatedFavorites;
       if (isFavorite) {
-        // Remove from favorites
         updatedFavorites = favorites.filter((id: number) => id !== product.id);
       } else {
-        // Add to favorites
         updatedFavorites = [...favorites, product.id];
       }
       localStorage.setItem('favorites', JSON.stringify(updatedFavorites));
-      setIsFavorite(!isFavorite); // Toggle the favorite status
+      setIsFavorite(!isFavorite);
     }
   };
 
